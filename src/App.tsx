@@ -147,6 +147,8 @@ function App() {
         setIsMinimized(false);
       }
     }, 500); // Wait 500ms after user stops typing
+
+    return () => clearTimeout(timer);
   }, [searchQuery, filteredStores, map]);
 
   // Update visible stores list when map bounds change (if no active search/selection)
