@@ -27,7 +27,7 @@ export function MobileBottomSheet({
         `}
         style={{
           maxHeight: minimized ? 'calc(100px + env(safe-area-inset-bottom))' : '85%',
-          paddingBottom: minimized ? 'env(safe-area-inset-bottom)' : '0'
+          paddingBottom: 'env(safe-area-inset-bottom)'
         }}
       >
         {/* Header */}
