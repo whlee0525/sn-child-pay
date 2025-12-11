@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Map, MapMarker, CustomOverlayMap, useKakaoLoader } from 'react-kakao-maps-sdk';
-import rawData from './data/seeds.min.json';
 
 // Define the shape of our optimized data
 interface StoreData {
@@ -10,9 +9,6 @@ interface StoreData {
   a: string; // address
   l: [number, number]; // [lat, lng]
 }
-
-// Data is now pre-cleaned by scripts/clean_and_min.js
-const stores = rawData as StoreData[];
 
 import { useSupercluster } from './hooks/useSupercluster';
 import { MobileBottomSheet } from './components/MobileBottomSheet';
@@ -30,11 +26,20 @@ function App() {
     libraries: ['services'],
   });
 
+  // Data Loading State
+  const [stores, setStores] = useState<StoreData[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState({
+    jungwon: false,
+    sujeong: false,
+    bundang: false,
+  });
+
   const [level, setLevel] = useState(4);
   const [map, setMap] = useState<kakao.maps.Map | null>(null);
   const [bounds, setBounds] = useState<{ sw: { lat: number; lng: number }; ne: { lat: number; lng: number } } | null>(null);
   const [userPosition, setUserPosition] = useState<{ lat: number; lng: number } | null>(null);
-  
+
   // 5-2. Real Data State
   const [selectedStore, setSelectedStore] = useState<StoreData | null>(null);
   
@@ -79,7 +84,53 @@ function App() {
     }
 
     return result;
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, stores]);
+
+  // Progressive Data Loading: 중원구 -> 수정구+분당구
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadData() {
+      try {
+        // 1단계: 중원구 먼저 로드 (초기 화면)
+        const jungwonResponse = await fetch('/data/jungwon.json');
+        const jungwonData: StoreData[] = await jungwonResponse.json();
+
+        if (!cancelled) {
+          setStores(jungwonData);
+          setLoadingProgress(prev => ({ ...prev, jungwon: true }));
+        }
+
+        // 2단계: 수정구 + 분당구 병렬 로드
+        const [sujeongResponse, bundangResponse] = await Promise.all([
+          fetch('/data/sujeong.json'),
+          fetch('/data/bundang.json')
+        ]);
+
+        const [sujeongData, bundangData]: [StoreData[], StoreData[]] = await Promise.all([
+          sujeongResponse.json(),
+          bundangResponse.json()
+        ]);
+
+        if (!cancelled) {
+          setStores([...jungwonData, ...sujeongData, ...bundangData]);
+          setLoadingProgress({ jungwon: true, sujeong: true, bundang: true });
+          setDataLoading(false);
+        }
+      } catch (error) {
+        console.error('데이터 로딩 실패:', error);
+        if (!cancelled) {
+          setDataLoading(false);
+        }
+      }
+    }
+
+    loadData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Auto-fit map bounds when search results change (with debounce)
   useEffect(() => {
@@ -220,7 +271,37 @@ function App() {
   };
 
 
-  if (loading) return <div className="flex items-center justify-center h-screen bg-gray-50 text-blue-600 font-bold">지도 로딩중...</div>;
+  if (loading || dataLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="text-blue-600 font-bold text-lg mb-4">
+            {loading ? '지도 로딩 중...' : '가맹점 데이터 로딩 중...'}
+          </div>
+          {dataLoading && (
+            <div className="text-sm text-gray-600 space-y-2">
+              <div className="flex items-center justify-center gap-2">
+                <span className={loadingProgress.jungwon ? 'text-green-600' : 'text-gray-400'}>
+                  {loadingProgress.jungwon ? '✓' : '○'} 중원구
+                </span>
+                <span className={loadingProgress.sujeong ? 'text-green-600' : 'text-gray-400'}>
+                  {loadingProgress.sujeong ? '✓' : '○'} 수정구
+                </span>
+                <span className={loadingProgress.bundang ? 'text-green-600' : 'text-gray-400'}>
+                  {loadingProgress.bundang ? '✓' : '○'} 분당구
+                </span>
+              </div>
+              {loadingProgress.jungwon && !loadingProgress.bundang && (
+                <div className="text-xs text-blue-500 mt-2">
+                  중원구 가맹점이 표시됩니다. 나머지 구 데이터 로딩 중...
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
   if (error) return <div className="flex items-center justify-center h-screen bg-red-50 text-red-500">지도를 불러오는데 실패했습니다.</div>;
 
   return (
