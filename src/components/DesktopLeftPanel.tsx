@@ -1,5 +1,5 @@
 import React from 'react';
-// import { AdBanner } from './AdBanner';
+import { AdBanner } from './AdBanner';
 import { FooterInfo } from './FooterInfo';
 
 interface DesktopLeftPanelProps {
@@ -18,7 +18,7 @@ export function DesktopLeftPanel({
     <>
       <div
         className={`
-          absolute top-0 left-0 h-full w-[400px] z-30 bg-white shadow-2xl
+          absolute top-0 left-0 h-full w-[360px] z-30 bg-white shadow-2xl
           transition-transform duration-300 ease-in-out flex flex-col
           rounded-r-xl pointer-events-auto
           ${isVisible ? 'translate-x-0' : '-translate-x-full'}
@@ -74,10 +74,13 @@ export function DesktopLeftPanel({
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-2 border-t border-gray-100 shrink-0 space-y-2 bg-white">
-        {/* TODO: 광고 승인 후 주석 해제 */}
-        {/* <AdBanner /> */}
+      <div className="px-4 pt-[9px] pb-8 border-t border-gray-100 shrink-0 space-y-2 bg-white">
         <FooterInfo />
+        {/* 광고 승인 후 주석 해제 */}
+        <AdBanner 
+          unitId={import.meta.env.VITE_KAKAO_ADFIT_UNIT_ID_PC} 
+          format="pc" 
+        />
       </div>
     </div>
     </>

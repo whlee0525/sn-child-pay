@@ -12,6 +12,7 @@ interface StoreData {
 
 import { useSupercluster } from './hooks/useSupercluster';
 import { MobileBottomSheet } from './components/MobileBottomSheet';
+import { AdBanner } from './components/AdBanner';
 import { DesktopLeftPanel } from './components/DesktopLeftPanel';
 import { StoreDetailView } from './components/StoreDetailView';
 import { StoreListView } from './components/StoreListView';
@@ -283,7 +284,7 @@ function App() {
   return (
     <div className="w-full h-[100dvh] relative overflow-hidden bg-gray-100">
           {/* Map Layer (Background) - Avoid left panel on desktop */}
-          <div className={`absolute inset-0 z-0 transition-all duration-300 ${isPanelVisible ? 'md:left-[400px]' : 'md:left-0'}`}>
+          <div className={`absolute inset-0 z-0 transition-all duration-300 ${isPanelVisible ? 'md:left-[360px]' : 'md:left-0'}`}>
             <Map
                 center={{ lat: 37.4200, lng: 127.1265 }}
                 style={{ width: '100%', height: '100%' }}
@@ -517,7 +518,7 @@ function App() {
           </div>
 
           {/* UI Layer (Foreground) - Category Filter */}
-          <div className={`absolute inset-x-0 top-0 z-10 p-4 pointer-events-none flex justify-center transition-all duration-300 ${isPanelVisible ? 'md:left-[400px]' : 'md:left-0'}`}>
+          <div className={`absolute inset-x-0 top-0 z-10 p-4 pointer-events-none flex justify-center transition-all duration-300 ${isPanelVisible ? 'md:left-[360px]' : 'md:left-0'}`}>
               <div className="w-full md:w-auto max-w-2xl pointer-events-auto">
                 <CategoryFilter
                   selectedCategory={selectedCategory}
@@ -550,6 +551,14 @@ function App() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </button>
+
+          {/* PC Right Sidebar Ad (160x600) */}
+          <div className="hidden md:block absolute right-4 top-4 z-20">
+              <AdBanner 
+                  unitId={import.meta.env.VITE_KAKAO_ADFIT_UNIT_ID_PC_RIGHT} 
+                  format="pc-vertical" 
+              />
+          </div>
 
           {/* Mobile Bottom Sheet */}
           <div className="md:hidden">

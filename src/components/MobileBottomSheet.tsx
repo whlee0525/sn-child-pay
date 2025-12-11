@@ -1,5 +1,5 @@
 import React from 'react';
-// import { AdBanner } from './AdBanner';
+import { AdBanner } from './AdBanner';
 import { FooterInfo } from './FooterInfo';
 
 interface MobileBottomSheetProps {
@@ -102,10 +102,13 @@ export function MobileBottomSheet({
             </div>
 
             {/* Footer */}
-            <div className="px-4 py-2 border-t border-gray-100 shrink-0 space-y-2 bg-white">
-              {/* TODO: 광고 승인 후 주석 해제 */}
-              {/* <AdBanner /> */}
+            <div className="px-4 pt-[9px] pb-2 border-t border-gray-100 shrink-0 space-y-2 bg-white">
               <FooterInfo />
+              {/* 광고 승인 후 주석 해제 */}
+              <AdBanner 
+                unitId={import.meta.env.VITE_KAKAO_ADFIT_UNIT_ID} 
+                format="mobile" 
+              />
             </div>
           </>
         )}
