@@ -7,12 +7,13 @@ interface MobileBottomSheetProps {
   onMinimize?: () => void;
   onBack?: () => void;
   minimized?: boolean;
+  dataLoading?: boolean;
   searchBar?: React.ReactNode;
   children: React.ReactNode;
 }
 
 export function MobileBottomSheet({
-  isOpen, onMinimize, onBack, minimized, searchBar, children
+  isOpen, onMinimize, onBack, minimized, dataLoading, searchBar, children
 }: MobileBottomSheetProps) {
   return (
     <>
@@ -30,9 +31,14 @@ export function MobileBottomSheet({
       >
         {/* Header */}
         <div className="shrink-0 flex items-center justify-between px-4 py-2">
-          <h2 className={`flex-1 mr-2 truncate ${minimized ? 'text-sm font-medium text-[#004098]' : 'text-base font-bold text-[#004098]'}`}>
-            성남시 아동수당 사용처 2025
-          </h2>
+          <div className="flex-1 mr-2 flex items-center gap-2">
+            <h2 className={`truncate ${minimized ? 'text-sm font-medium text-[#004098]' : 'text-base font-bold text-[#004098]'}`}>
+              성남시 아동수당 사용처 2025
+            </h2>
+            {dataLoading && !minimized && (
+              <span className="text-xs text-gray-400 whitespace-nowrap">데이터 로딩중</span>
+            )}
+          </div>
 
           {/* Buttons */}
           <div className="flex items-center gap-1">

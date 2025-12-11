@@ -29,11 +29,6 @@ function App() {
   // Data Loading State
   const [stores, setStores] = useState<StoreData[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
-  const [loadingProgress, setLoadingProgress] = useState({
-    jungwon: false,
-    sujeong: false,
-    bundang: false,
-  });
 
   const [level, setLevel] = useState(4);
   const [map, setMap] = useState<kakao.maps.Map | null>(null);
@@ -98,7 +93,6 @@ function App() {
 
         if (!cancelled) {
           setStores(jungwonData);
-          setLoadingProgress(prev => ({ ...prev, jungwon: true }));
         }
 
         // 2단계: 수정구 + 분당구 병렬 로드
@@ -114,7 +108,6 @@ function App() {
 
         if (!cancelled) {
           setStores([...jungwonData, ...sujeongData, ...bundangData]);
-          setLoadingProgress({ jungwon: true, sujeong: true, bundang: true });
           setDataLoading(false);
         }
       } catch (error) {
@@ -271,33 +264,16 @@ function App() {
   };
 
 
-  if (loading || dataLoading) {
+  if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
         <div className="text-center">
-          <div className="text-blue-600 font-bold text-lg mb-4">
-            {loading ? '지도 로딩 중...' : '가맹점 데이터 로딩 중...'}
+          <div className="text-blue-600 font-bold text-lg mb-2">
+            성남시 아동수당 사용처
           </div>
-          {dataLoading && (
-            <div className="text-sm text-gray-600 space-y-2">
-              <div className="flex items-center justify-center gap-2">
-                <span className={loadingProgress.jungwon ? 'text-green-600' : 'text-gray-400'}>
-                  {loadingProgress.jungwon ? '✓' : '○'} 중원구
-                </span>
-                <span className={loadingProgress.sujeong ? 'text-green-600' : 'text-gray-400'}>
-                  {loadingProgress.sujeong ? '✓' : '○'} 수정구
-                </span>
-                <span className={loadingProgress.bundang ? 'text-green-600' : 'text-gray-400'}>
-                  {loadingProgress.bundang ? '✓' : '○'} 분당구
-                </span>
-              </div>
-              {loadingProgress.jungwon && !loadingProgress.bundang && (
-                <div className="text-xs text-blue-500 mt-2">
-                  중원구 가맹점이 표시됩니다. 나머지 구 데이터 로딩 중...
-                </div>
-              )}
-            </div>
-          )}
+          <div className="text-gray-500 text-sm">
+            지도 로딩중
+          </div>
         </div>
       </div>
     );
@@ -580,6 +556,7 @@ function App() {
                 <MobileBottomSheet
                     isOpen={true}
                     minimized={isMinimized}
+                    dataLoading={dataLoading}
                     onMinimize={() => setIsMinimized(!isMinimized)}
                     onBack={
                       selectedStore ? () => {
@@ -648,6 +625,7 @@ function App() {
           <div className="hidden md:block">
                 <DesktopLeftPanel
                     isVisible={isPanelVisible}
+                    dataLoading={dataLoading}
                     onClose={() => setIsPanelVisible(false)}
                     onBack={
                       selectedStore ? () => {
