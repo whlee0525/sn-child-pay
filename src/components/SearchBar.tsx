@@ -3,6 +3,7 @@ import React from 'react';
 interface SearchBarProps {
   value: string;
   onChange: (value: string) => void;
+  onInput?: (value: string) => void;
   onSubmit?: () => void;
   placeholder?: string;
   resultCount?: number;
@@ -13,12 +14,31 @@ interface SearchBarProps {
 export function SearchBar({
   value,
   onChange,
+  onInput,
   onSubmit,
   placeholder = '검색...',
   resultCount,
   totalCount,
   selectedCategory = '전체',
 }: SearchBarProps) {
+  const [localValue, setLocalValue] = React.useState(value);
+
+  // Sync local value with prop when prop changes (e.g. clear button from outside, or initial load)
+  React.useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  // Debounce updates to parent
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localValue !== value) {
+        onChange(localValue);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [localValue, onChange, value]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && onSubmit) {
       onSubmit();
@@ -46,14 +66,21 @@ export function SearchBar({
         <input
           type="text"
           placeholder={placeholder}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
+          value={localValue}
+          onChange={(e) => {
+            setLocalValue(e.target.value);
+            onInput?.(e.target.value);
+          }}
           onKeyDown={handleKeyDown}
           className="flex-1 bg-transparent outline-none text-sm placeholder-gray-400"
         />
-        {value && (
+        {localValue && (
           <button
-            onClick={() => onChange('')}
+            onClick={() => {
+                setLocalValue('');
+                onChange(''); // Immediate clear
+                onInput?.('');
+            }}
             className="text-gray-400 hover:text-gray-600 flex-shrink-0"
           >
             <svg

@@ -141,15 +141,41 @@ function App() {
       
       // Auto-show search results list (no limit)
       if (filteredStores.length > 0) {
-        setClusterStores(filteredStores);
+        setClusterStores(filteredStores.slice(0, 100));
         setIsFromSearch(true);
         setSelectedStore(null);
         setIsMinimized(false);
       }
     }, 500); // Wait 500ms after user stops typing
+  }, [searchQuery, filteredStores, map]);
+
+  // Update visible stores list when map bounds change (if no active search/selection)
+  useEffect(() => {
+    // Skip if searching or store selected
+    // Note: We removed isFromSearch check to allow list to update if user clears search but doesn't move map yet,
+    // or if they just want to see what's visible. The key is !searchQuery.
+    if (searchQuery.trim() || selectedStore || !map || !bounds) return;
+
+    const timer = setTimeout(() => {
+      const sw = bounds.sw;
+      const ne = bounds.ne;
+
+      // Filter stores within current map bounds
+      // Use filteredStores to respect selected category
+      const visible = filteredStores.filter(store => {
+        const [lat, lng] = store.l;
+        return lat >= sw.lat && lat <= ne.lat &&
+               lng >= sw.lng && lng <= ne.lng;
+      });
+
+      // Limit to 50 items for performance
+      setClusterStores(visible.slice(0, 50));
+      // Ensure we mark this as NOT from search so we don't restore it improperly later if needed
+      setIsFromSearch(false);
+    }, 300); // Debounce to allow smooth dragging
 
     return () => clearTimeout(timer);
-  }, [filteredStores, searchQuery]);
+  }, [bounds, searchQuery, selectedStore, filteredStores, map]);
 
   // Relayout map when panel visibility changes (PC only)
   useEffect(() => {
@@ -189,7 +215,7 @@ function App() {
     points: filteredStores,
     bounds,
     zoom: scZoom,
-    options: { radius: 60, maxZoom: 17 } // Cluster up to very close levels (17), split at 18
+    options: { radius: 80, maxZoom: 17 } // Cluster until Level 2 (SC Zoom 18), large radius for perf
   });
 
 
@@ -284,7 +310,7 @@ function App() {
   return (
     <div className="w-full h-[100dvh] relative overflow-hidden bg-gray-100">
           {/* Map Layer (Background) - Avoid left panel on desktop */}
-          <div className={`absolute inset-0 z-0 transition-all duration-300 ${isPanelVisible ? 'md:left-[332px]' : 'md:left-0'} md:right-[160px]`}>
+          <div className={`absolute inset-0 z-0 transition-all duration-300 ${isPanelVisible ? 'md:left-[332px]' : 'md:left-0'} right-0`}>
             <Map
                 center={{ lat: 37.4200, lng: 127.1265 }}
                 style={{ width: '100%', height: '100%' }}
@@ -518,7 +544,7 @@ function App() {
           </div>
 
           {/* UI Layer (Foreground) - Category Filter */}
-          <div className={`absolute inset-x-0 top-0 z-10 p-4 pointer-events-none flex justify-center transition-all duration-300 ${isPanelVisible ? 'md:left-[332px]' : 'md:left-0'} md:right-[160px]`}>
+          <div className={`absolute inset-x-0 top-0 z-10 p-4 pointer-events-none flex justify-center transition-all duration-300 ${isPanelVisible ? 'md:left-[332px]' : 'md:left-0'} md:right-4 xl:right-[192px]`}>
               <div className="w-full md:w-auto max-w-2xl pointer-events-auto">
                 <CategoryFilter
                   selectedCategory={selectedCategory}
@@ -543,7 +569,7 @@ function App() {
           {/* Location Button */}
           <button 
             onClick={moveToMyLocation}
-            className="absolute bottom-24 md:bottom-8 right-4 md:right-[180px] z-20 bg-white rounded-full p-3 shadow-lg border border-gray-200 hover:bg-blue-50 transition-colors"
+            className="absolute bottom-24 md:bottom-8 right-4 md:right-4 xl:right-[212px] z-20 bg-white rounded-full p-3 shadow-lg border border-gray-200 hover:bg-blue-50 transition-colors"
             aria-label="내 위치로 이동"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#004098]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -552,8 +578,8 @@ function App() {
             </svg>
           </button>
 
-          {/* PC Right Panel (160px) */}
-          <div className="hidden md:flex absolute top-0 right-0 w-[160px] h-full z-30 bg-white border-l border-gray-200 items-start justify-center">
+          {/* PC Right Panel (160px -> 192px for padding) */}
+          <div className="hidden xl:flex absolute top-0 right-0 w-[192px] h-full z-30 bg-black/10 backdrop-blur-sm items-start justify-center pt-4">
               <AdBanner 
                   unitId={import.meta.env.VITE_KAKAO_ADFIT_UNIT_ID_PC_RIGHT} 
                   format="pc-vertical" 
@@ -571,8 +597,13 @@ function App() {
                       selectedStore ? () => {
                         setSelectedStore(null);
                         setHighlightedStoreId(null);
-                        if (!clusterStores) {
-                          setSearchQuery('');
+                        if (searchQuery.trim()) {
+                            // Restore search results if query exists
+                            setClusterStores(filteredStores.slice(0, 100));
+                            setIsFromSearch(true);
+                        } else {
+                            // No search query, clear list (will be auto-filled by visible stores effect)
+                            setClusterStores(null);
                         }
                         setIsMinimized(false);
                       } : undefined
@@ -640,8 +671,13 @@ function App() {
                       selectedStore ? () => {
                         setSelectedStore(null);
                         setHighlightedStoreId(null);
-                        if (!clusterStores) {
-                          setSearchQuery('');
+                        if (searchQuery.trim()) {
+                            // Restore search results if query exists
+                            setClusterStores(filteredStores.slice(0, 100));
+                            setIsFromSearch(true);
+                        } else {
+                            // No search query, clear list (will be auto-filled by visible stores effect)
+                            setClusterStores(null);
                         }
                       } : undefined
                     }
