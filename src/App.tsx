@@ -281,7 +281,7 @@ function App() {
   if (error) return <div className="flex items-center justify-center h-screen bg-red-50 text-red-500">지도를 불러오는데 실패했습니다.</div>;
 
   return (
-    <div className="w-full h-screen relative overflow-hidden bg-gray-100">
+    <div className="w-full h-[100dvh] relative overflow-hidden bg-gray-100">
           {/* Map Layer (Background) - Avoid left panel on desktop */}
           <div className={`absolute inset-0 z-0 transition-all duration-300 ${isPanelVisible ? 'md:left-[400px]' : 'md:left-0'}`}>
             <Map
