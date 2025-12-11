@@ -87,9 +87,8 @@ export function getCategoryGroup(category: string): CategoryGroup {
 export function getCategoriesInGroup(group: CategoryGroup): string[] {
   if (group === "전체") return [];
   if (group === "기타") {
-    // 매핑되지 않은 모든 업종
-    const mappedCategories = new Set(Object.keys(CATEGORY_TO_GROUP));
-    return []; // 실제로는 전체 업종에서 매핑된 것을 제외해야 하지만, 필터링 로직에서 처리
+    // 매핑되지 않은 모든 업종 - 필터링 로직에서 처리
+    return [];
   }
 
   return Object.entries(CATEGORY_TO_GROUP)

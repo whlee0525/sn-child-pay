@@ -568,7 +568,6 @@ function App() {
                 <DesktopLeftPanel
                     isVisible={isPanelVisible}
                     onClose={() => setIsPanelVisible(false)}
-                    onToggle={() => setIsPanelVisible(!isPanelVisible)}
                     onBack={
                       selectedStore ? () => {
                         setSelectedStore(null);

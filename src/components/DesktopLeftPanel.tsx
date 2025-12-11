@@ -1,19 +1,17 @@
 import React from 'react';
-import { AdBanner } from './AdBanner';
+// import { AdBanner } from './AdBanner';
 import { FooterInfo } from './FooterInfo';
 
 interface DesktopLeftPanelProps {
   isVisible: boolean;
   onClose: () => void;
-  onToggle?: () => void;
   onBack?: () => void;
-  title?: string;
   searchBar?: React.ReactNode;
   children: React.ReactNode;
 }
 
 export function DesktopLeftPanel({
-  isVisible, onClose, onToggle, onBack, title, searchBar, children
+  isVisible, onClose, onBack, searchBar, children
 }: DesktopLeftPanelProps) {
   return (
     <>

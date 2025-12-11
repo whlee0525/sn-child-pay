@@ -1,19 +1,18 @@
 import React from 'react';
-import { AdBanner } from './AdBanner';
+// import { AdBanner } from './AdBanner';
 import { FooterInfo } from './FooterInfo';
 
 interface MobileBottomSheetProps {
   isOpen: boolean;
   onMinimize?: () => void;
   onBack?: () => void;
-  title?: string;
   minimized?: boolean;
   searchBar?: React.ReactNode;
   children: React.ReactNode;
 }
 
 export function MobileBottomSheet({
-  isOpen, onMinimize, onBack, title, minimized, searchBar, children
+  isOpen, onMinimize, onBack, minimized, searchBar, children
 }: MobileBottomSheetProps) {
   return (
     <>
