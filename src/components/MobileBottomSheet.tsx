@@ -26,7 +26,8 @@ export function MobileBottomSheet({
           ${isOpen ? 'translate-y-0' : 'translate-y-full'}
         `}
         style={{
-          maxHeight: minimized ? '80px' : '85%'
+          maxHeight: minimized ? 'calc(100px + env(safe-area-inset-bottom))' : '85%',
+          paddingBottom: minimized ? 'env(safe-area-inset-bottom)' : '0'
         }}
       >
         {/* Header */}
