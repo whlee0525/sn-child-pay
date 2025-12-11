@@ -18,7 +18,7 @@ export function DesktopLeftPanel({
     <>
       <div
         className={`
-          absolute top-0 left-0 h-full w-[360px] z-30 bg-white shadow-2xl
+          absolute top-0 left-0 h-full w-[332px] z-30 bg-white shadow-2xl
           transition-transform duration-300 ease-in-out flex flex-col
           rounded-r-xl pointer-events-auto
           ${isVisible ? 'translate-x-0' : '-translate-x-full'}
@@ -74,7 +74,7 @@ export function DesktopLeftPanel({
       </div>
 
       {/* Footer */}
-      <div className="px-4 pt-[9px] pb-8 border-t border-gray-100 shrink-0 space-y-2 bg-white">
+      <div className="px-4 pt-[10px] pb-8 border-t border-gray-100 shrink-0 space-y-2 bg-white">
         <FooterInfo />
         {/* 광고 승인 후 주석 해제 */}
         <AdBanner 

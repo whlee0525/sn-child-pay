@@ -33,8 +33,8 @@ export function AdBanner({ unitId, format = 'mobile' }: AdBannerProps) {
       ins.setAttribute('data-ad-unit', unitId);
       
       if (isPc) {
-         ins.setAttribute('data-ad-width', '320');
-         ins.setAttribute('data-ad-height', '100');
+         ins.setAttribute('data-ad-width', '300');
+         ins.setAttribute('data-ad-height', '250');
       } else if (isPcVertical) {
          ins.setAttribute('data-ad-width', '160');
          ins.setAttribute('data-ad-height', '600');
@@ -83,13 +83,12 @@ export function AdBanner({ unitId, format = 'mobile' }: AdBannerProps) {
 
     if (isPc) {
         return (
-            <div className="w-[320px] h-[100px] mx-auto bg-gray-50 border border-gray-200 flex flex-row items-center justify-between px-4 rounded-lg overflow-hidden">
-                <div className="flex flex-col gap-1">
-                    <span className="w-fit bg-gray-200 text-xs text-gray-500 px-2 py-0.5 rounded">AD (320x100)</span>
-                    <p className="font-bold text-gray-700 text-sm">성남시 아동수당<br/>사용처 찾기</p>
-                </div>
-                <button className="px-4 py-2 bg-[#004098] text-white text-sm font-bold rounded hover:bg-[#003377] transition-colors">
-                    보기
+            <div className="w-[300px] h-[250px] mx-auto bg-gray-50 border border-gray-200 flex flex-col items-center justify-center p-4 text-center rounded-lg overflow-hidden">
+                <span className="bg-gray-200 text-xs text-gray-500 px-2 py-0.5 rounded mb-2">AD (300x250)</span>
+                <p className="font-bold text-gray-700 text-lg mb-1">성남시 아동수당</p>
+                <p className="text-gray-500 text-sm mb-4">우리 아이를 위한 혜택<br/>놓치지 마세요!</p>
+                <button className="px-4 py-2 bg-[#004098] text-white text-sm font-bold rounded-lg hover:bg-[#003377] transition-colors">
+                    자세히 보기
                 </button>
             </div>
         );
@@ -116,7 +115,7 @@ export function AdBanner({ unitId, format = 'mobile' }: AdBannerProps) {
       <div 
         ref={adContainerRef} 
         className={
-            isPc ? 'w-[320px] h-[100px]' : 
+            isPc ? 'w-[300px] h-[250px]' : 
             isPcVertical ? 'w-[160px] h-[600px]' : 
             'w-full'
         } 

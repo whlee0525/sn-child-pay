@@ -284,7 +284,7 @@ function App() {
   return (
     <div className="w-full h-[100dvh] relative overflow-hidden bg-gray-100">
           {/* Map Layer (Background) - Avoid left panel on desktop */}
-          <div className={`absolute inset-0 z-0 transition-all duration-300 ${isPanelVisible ? 'md:left-[360px]' : 'md:left-0'}`}>
+          <div className={`absolute inset-0 z-0 transition-all duration-300 ${isPanelVisible ? 'md:left-[332px]' : 'md:left-0'} md:right-[160px]`}>
             <Map
                 center={{ lat: 37.4200, lng: 127.1265 }}
                 style={{ width: '100%', height: '100%' }}
@@ -518,7 +518,7 @@ function App() {
           </div>
 
           {/* UI Layer (Foreground) - Category Filter */}
-          <div className={`absolute inset-x-0 top-0 z-10 p-4 pointer-events-none flex justify-center transition-all duration-300 ${isPanelVisible ? 'md:left-[360px]' : 'md:left-0'}`}>
+          <div className={`absolute inset-x-0 top-0 z-10 p-4 pointer-events-none flex justify-center transition-all duration-300 ${isPanelVisible ? 'md:left-[332px]' : 'md:left-0'} md:right-[160px]`}>
               <div className="w-full md:w-auto max-w-2xl pointer-events-auto">
                 <CategoryFilter
                   selectedCategory={selectedCategory}
@@ -543,7 +543,7 @@ function App() {
           {/* Location Button */}
           <button 
             onClick={moveToMyLocation}
-            className="absolute bottom-24 md:bottom-8 right-4 z-20 bg-white rounded-full p-3 shadow-lg border border-gray-200 hover:bg-blue-50 transition-colors"
+            className="absolute bottom-24 md:bottom-8 right-4 md:right-[180px] z-20 bg-white rounded-full p-3 shadow-lg border border-gray-200 hover:bg-blue-50 transition-colors"
             aria-label="내 위치로 이동"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#004098]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -552,8 +552,8 @@ function App() {
             </svg>
           </button>
 
-          {/* PC Right Sidebar Ad (160x600) */}
-          <div className="hidden md:block absolute right-4 top-4 z-20">
+          {/* PC Right Panel (160px) */}
+          <div className="hidden md:flex absolute top-0 right-0 w-[160px] h-full z-30 bg-white border-l border-gray-200 items-start justify-center">
               <AdBanner 
                   unitId={import.meta.env.VITE_KAKAO_ADFIT_UNIT_ID_PC_RIGHT} 
                   format="pc-vertical" 

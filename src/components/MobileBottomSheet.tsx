@@ -102,7 +102,7 @@ export function MobileBottomSheet({
             </div>
 
             {/* Footer */}
-            <div className="px-4 pt-[9px] pb-2 border-t border-gray-100 shrink-0 space-y-2 bg-white">
+            <div className="px-4 pt-[10px] pb-2 border-t border-gray-100 shrink-0 space-y-2 bg-white">
               <FooterInfo />
               {/* 광고 승인 후 주석 해제 */}
               <AdBanner 
