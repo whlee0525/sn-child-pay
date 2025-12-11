@@ -85,7 +85,7 @@ export function SearchBar({
             selectedCategory !== '전체' ? (
               <span className="text-[#004098] font-semibold">'{selectedCategory}' {totalCount.toLocaleString()}곳</span>
             ) : (
-              <span>전체 {totalCount.toLocaleString()}곳 · 2025년 6월 기준</span>
+              <span>전체 {totalCount.toLocaleString()}곳</span>
             )
           ) : null}
         </p>

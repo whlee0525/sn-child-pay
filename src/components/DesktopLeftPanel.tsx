@@ -28,7 +28,7 @@ export function DesktopLeftPanel({
       <div className="shrink-0 flex items-center justify-between px-4 py-2">
         <div className="flex-1 mr-2 flex items-center gap-2">
           <h2 className="text-base font-bold text-[#004098] truncate">
-            성남시 아동수당 사용처 2025
+            성남시 아동수당 사용처
           </h2>
           {dataLoading && (
             <span className="text-xs text-gray-400 whitespace-nowrap">데이터 로딩중</span>
