@@ -4,7 +4,11 @@
       "Bash(npm run build:*)",
       "Bash(cat:*)",
       "Bash(python3:*)",
-      "Bash(node scripts/split_by_district.js:*)"
+      "Bash(node scripts/split_by_district.js:*)",
+      "Bash(npx lighthouse:*)",
+      "Bash(node -e:*)",
+      "Bash(npx vite:*)",
+      "Bash(npm install:*)"
     ]
   }
 }

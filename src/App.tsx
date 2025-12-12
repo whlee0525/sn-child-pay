@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Map, MapMarker, CustomOverlayMap, useKakaoLoader } from 'react-kakao-maps-sdk';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 // Define the shape of our optimized data
 interface StoreData {
@@ -310,6 +312,7 @@ function App() {
   if (error) return <div className="flex items-center justify-center h-screen bg-red-50 text-red-500">지도를 불러오는데 실패했습니다.</div>;
 
   return (
+    <>
     <div className="w-full h-[100dvh] relative overflow-hidden bg-gray-100">
           {/* Map Layer (Background) - Avoid left panel on desktop */}
           <div className={`absolute inset-0 z-0 transition-all duration-300 ${isPanelVisible ? 'md:left-[332px]' : 'md:left-0'} right-0`}>
@@ -735,6 +738,9 @@ function App() {
                 </DesktopLeftPanel>
           </div>
     </div>
+    <Analytics />
+    <SpeedInsights />
+    </>
   );
 }
 
