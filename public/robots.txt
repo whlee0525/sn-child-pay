@@ -1,10 +1,8 @@
-# 배포 후 YOUR-DOMAIN.com을 실제 도메인으로 변경하세요
-
 User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://YOUR-DOMAIN.com/sitemap.xml
+Sitemap: https://sn-child-pay.com/sitemap.xml
 
 # 크롤링 속도 조절 (선택사항)
 Crawl-delay: 1

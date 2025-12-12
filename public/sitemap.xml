@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 배포 후 YOUR-DOMAIN.com을 실제 도메인으로 변경하세요 -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
@@ -7,12 +6,10 @@
 
   <!-- 메인 페이지 -->
   <url>
-    <loc>https://YOUR-DOMAIN.com</loc>
-    <lastmod>2025-01-10</lastmod>
+    <loc>https://sn-child-pay.com</loc>
+    <lastmod>2025-12-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
-
-  <!-- 추가 페이지가 있다면 여기에 추가 -->
 
 </urlset>
