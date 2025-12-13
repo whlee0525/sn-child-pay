@@ -8,7 +8,8 @@
       "Bash(npx lighthouse:*)",
       "Bash(node -e:*)",
       "Bash(npx vite:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(npm run dev:*)"
     ]
   }
 }

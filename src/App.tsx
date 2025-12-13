@@ -24,7 +24,7 @@ import { Category } from './data/categories';
 import { getCategoryGroup } from './data/categoryMapping';
 
 function App() {
-  const [loading, error] = useKakaoLoader({
+  const [, error] = useKakaoLoader({
     appkey: import.meta.env.VITE_KAKAO_MAP_API_KEY,
     libraries: ['services'],
   });
@@ -140,13 +140,18 @@ function App() {
     
     const timer = setTimeout(() => {
       fitBoundsToResults();
-      
+
       // Auto-show search results list (no limit)
       if (filteredStores.length > 0) {
         setClusterStores(filteredStores.slice(0, 100));
         setIsFromSearch(true);
         setSelectedStore(null);
         setIsMinimized(false);
+      } else {
+        // Clear list when search has no results
+        setClusterStores(null);
+        setIsFromSearch(true);
+        setSelectedStore(null);
       }
     }, 500); // Wait 500ms after user stops typing
 
@@ -158,7 +163,8 @@ function App() {
     // Skip if searching or store selected
     // Note: We removed isFromSearch check to allow list to update if user clears search but doesn't move map yet,
     // or if they just want to see what's visible. The key is !searchQuery.
-    if (searchQuery.trim() || selectedStore || !map || !bounds) return;
+    // Also skip if data is still loading to prevent list jumping
+    if (searchQuery.trim() || selectedStore || !map || !bounds || dataLoading) return;
 
     const timer = setTimeout(() => {
       const sw = bounds.sw;
@@ -179,7 +185,7 @@ function App() {
     }, 300); // Debounce to allow smooth dragging
 
     return () => clearTimeout(timer);
-  }, [bounds, searchQuery, selectedStore, filteredStores, map]);
+  }, [bounds, searchQuery, selectedStore, filteredStores, map, dataLoading]);
 
   // Relayout map when panel visibility changes (PC only)
   useEffect(() => {
@@ -295,20 +301,6 @@ function App() {
   };
 
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
-        <div className="text-center">
-          <div className="text-blue-600 font-bold text-lg mb-2">
-            성남시 아동수당 사용처
-          </div>
-          <div className="text-gray-500 text-sm">
-            지도 로딩중
-          </div>
-        </div>
-      </div>
-    );
-  }
   if (error) return <div className="flex items-center justify-center h-screen bg-red-50 text-red-500">지도를 불러오는데 실패했습니다.</div>;
 
   return (
@@ -584,7 +576,7 @@ function App() {
           </button>
 
           {/* PC Right Panel (160px -> 192px for padding) */}
-          <div className="hidden xl:flex absolute top-0 right-0 w-[192px] h-full z-30 bg-black/10 backdrop-blur-sm items-start justify-center pt-4">
+          <div className="hidden xl:flex absolute top-0 right-0 w-[192px] h-full z-50 bg-black/10 backdrop-blur-sm items-start justify-center pt-4">
               <AdBanner 
                   unitId={import.meta.env.VITE_KAKAO_ADFIT_UNIT_ID_PC_RIGHT} 
                   format="pc-vertical" 
@@ -597,6 +589,7 @@ function App() {
                     isOpen={true}
                     minimized={isMinimized}
                     dataLoading={dataLoading}
+                    expandedHeight="65%"
                     onMinimize={() => setIsMinimized(!isMinimized)}
                     onBack={
                       selectedStore ? () => {
@@ -626,7 +619,7 @@ function App() {
                     ) : undefined}
                 >
                     {/* Content based on state */}
-                    <div className="transition-all duration-300 ease-in-out" key={selectedStore ? 'detail' : clusterStores ? 'list' : 'empty'}>
+                    <div className="transition-all duration-300 ease-in-out h-full" key={selectedStore ? 'detail' : clusterStores ? 'list' : 'empty'}>
                       {selectedStore ? (
                           <div className="animate-slideInRight pt-4">
                             <StoreDetailView
@@ -654,7 +647,7 @@ function App() {
                             />
                           </div>
                       ) : (
-                          <div className="text-center py-8 text-gray-400 text-sm animate-fadeIn min-h-[100px] flex items-center justify-center">
+                          <div className="text-center text-gray-400 text-sm animate-fadeIn h-full flex items-center justify-center">
                             {searchQuery ? (
                               <p>검색 결과가 없습니다</p>
                             ) : (
@@ -699,7 +692,7 @@ function App() {
                     ) : undefined}
                 >
                     {/* Content based on state */}
-                    <div className="transition-all duration-300 ease-in-out" key={selectedStore ? 'detail' : clusterStores ? 'list' : 'empty'}>
+                    <div className="transition-all duration-300 ease-in-out h-full" key={selectedStore ? 'detail' : clusterStores ? 'list' : 'empty'}>
                       {selectedStore ? (
                           <div className="animate-slideInRight pt-4">
                             <StoreDetailView
@@ -726,7 +719,7 @@ function App() {
                             />
                           </div>
                       ) : (
-                          <div className="text-center py-8 text-gray-400 text-sm animate-fadeIn min-h-[100px] flex items-center justify-center">
+                          <div className="text-center text-gray-400 text-sm animate-fadeIn h-full flex items-center justify-center">
                             {searchQuery ? (
                               <p>검색 결과가 없습니다</p>
                             ) : (

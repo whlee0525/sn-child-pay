@@ -18,7 +18,7 @@ export function DesktopLeftPanel({
     <>
       <div
         className={`
-          absolute top-0 left-0 h-full w-[332px] z-30 bg-white shadow-2xl
+          absolute top-0 left-0 h-full w-[332px] z-50 bg-white shadow-2xl
           transition-transform duration-300 ease-in-out flex flex-col
           rounded-r-xl pointer-events-auto
           ${isVisible ? 'translate-x-0' : '-translate-x-full'}
@@ -63,7 +63,7 @@ export function DesktopLeftPanel({
 
       {/* Search Bar */}
       {searchBar && (
-        <div className="px-4 pb-2 shrink-0">
+        <div className="px-4 shrink-0">
           {searchBar}
         </div>
       )}

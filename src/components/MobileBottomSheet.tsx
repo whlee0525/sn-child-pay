@@ -10,23 +10,24 @@ interface MobileBottomSheetProps {
   dataLoading?: boolean;
   searchBar?: React.ReactNode;
   children: React.ReactNode;
+  expandedHeight?: string;
 }
 
 export function MobileBottomSheet({
-  isOpen, onMinimize, onBack, minimized, dataLoading, searchBar, children
+  isOpen, onMinimize, onBack, minimized, dataLoading, searchBar, children, expandedHeight = '70%'
 }: MobileBottomSheetProps) {
   return (
     <>
       {/* Sheet */}
       <div
         className={`
-          absolute bottom-0 left-0 w-full z-30 bg-white shadow-2xl
+          absolute bottom-0 left-0 w-full z-50 bg-white shadow-2xl
           transition-transform duration-300 ease-in-out flex flex-col pointer-events-auto
           rounded-t-[28px]
           ${isOpen ? 'translate-y-0' : 'translate-y-full'}
         `}
         style={{
-          maxHeight: minimized ? 'calc(100px + env(safe-area-inset-bottom))' : '70%',
+          height: minimized ? 'auto' : expandedHeight,
           paddingBottom: 'env(safe-area-inset-bottom)',
           bottom: 0
         }}
@@ -91,7 +92,7 @@ export function MobileBottomSheet({
           <>
             {/* Search Bar */}
             {searchBar && (
-              <div className="px-4 pb-2 shrink-0">
+              <div className="px-4 shrink-0">
                 {searchBar}
               </div>
             )}
