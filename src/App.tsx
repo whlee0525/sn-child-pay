@@ -36,7 +36,6 @@ function App() {
   const [level, setLevel] = useState(4);
   const [map, setMap] = useState<kakao.maps.Map | null>(null);
   const [bounds, setBounds] = useState<{ sw: { lat: number; lng: number }; ne: { lat: number; lng: number } } | null>(null);
-  const [userPosition, setUserPosition] = useState<{ lat: number; lng: number } | null>(null);
 
   // 5-2. Real Data State
   const [selectedStore, setSelectedStore] = useState<StoreData | null>(null);
@@ -228,40 +227,6 @@ function App() {
     options: { radius: 80, maxZoom: 17 } // Cluster until Level 2 (SC Zoom 18), large radius for perf
   });
 
-
-  const moveToMyLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-          
-          // Check if user position already exists and is close to current location
-          if (userPosition) {
-            const distance = Math.sqrt(
-              Math.pow(userPosition.lat - lat, 2) + Math.pow(userPosition.lng - lng, 2)
-            );
-            
-            // If position hasn't changed much (within ~100m), toggle off
-            if (distance < 0.001) {
-              setUserPosition(null);
-              return;
-            }
-          }
-          
-          // Set new position and move map
-          setUserPosition({ lat, lng });
-          
-          if (map) {
-            map.setCenter(new kakao.maps.LatLng(lat, lng));
-            map.setLevel(3);
-          }
-        },
-        (err) => console.error(err)
-      );
-    }
-  };
-
   // Fit map bounds to show all filtered stores
   const fitBoundsToResults = () => {
     if (!map || filteredStores.length === 0) return;
@@ -336,34 +301,6 @@ function App() {
                     }
                 }} // Minimize on mobile, clear selections on map click
             >
-                {/* User Position */}
-                {/* User Location Marker - Naver/Kakao style */}
-                {userPosition && (
-                    <CustomOverlayMap
-                        position={userPosition}
-                        clickable={false}
-                    >
-                        <div 
-                            className="relative"
-                            style={{ 
-                                width: '48px', 
-                                height: '48px',
-                                marginLeft: '-24px',
-                                marginTop: '-24px'
-                            }}
-                        >
-                            {/* Outer pulse ring */}
-                            <div className="absolute inset-0 bg-blue-500 rounded-full opacity-20 animate-ping"></div>
-                            {/* Middle ring */}
-                            <div className="absolute inset-2 bg-blue-500 rounded-full opacity-40"></div>
-                            {/* Inner dot with border */}
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-4 h-4 bg-white rounded-full shadow-lg" style={{ border: '3px solid #3b82f6' }}></div>
-                            </div>
-                        </div>
-                    </CustomOverlayMap>
-                )}
-
                 {/* Render Clusters & Markers manually */}
                 {(() => {
                     // Manual overlap detection - group markers at same/very close positions
@@ -562,18 +499,6 @@ function App() {
               </svg>
             </button>
           )}
-
-          {/* Location Button */}
-          <button 
-            onClick={moveToMyLocation}
-            className="absolute bottom-24 md:bottom-8 right-4 md:right-4 xl:right-[212px] z-20 bg-white rounded-full p-3 shadow-lg border border-gray-200 hover:bg-blue-50 transition-colors"
-            aria-label="내 위치로 이동"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#004098]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </button>
 
           {/* PC Right Panel (160px -> 192px for padding) */}
           <div className="hidden xl:flex absolute top-0 right-0 w-[192px] h-full z-50 bg-black/10 backdrop-blur-sm items-start justify-center pt-4">
