@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 
 declare global {
   interface Window {
@@ -18,20 +18,24 @@ declare global {
 
 interface CoupangBannerProps {
   format?: 'mobile' | 'pc-vertical';
-  id?: string; // 고유 ID 추가
+  id?: string;
 }
 
-export function CoupangBanner({ format = 'mobile', id }: CoupangBannerProps) {
+export function CoupangBanner({ format = 'mobile', id: propsId }: CoupangBannerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   
-  // 컨테이너 ID 생성 (Props가 없으면 기본값 사용)
-  const bannerContainerId = id || `coupang-banner-${format}-${Math.random().toString(36).substr(2, 9)}`;
+  // 컨테이너 ID를 컴포넌트 생명주기 동안 안정적으로 유지
+  const bannerContainerId = useMemo(() => {
+    if (propsId) return propsId;
+    return `coupang-banner-${format}-${Math.random().toString(36).substring(2, 9)}`;
+  }, [propsId, format]);
 
   const getCalculatedHeight = () => {
     if (format === 'pc-vertical') return 600;
     
-    const width = window.innerWidth > 480 ? 480 : window.innerWidth;
+    // 모바일에서는 화면 너비에 따라 비례 제어
+    const width = typeof window !== 'undefined' ? (window.innerWidth > 480 ? 480 : window.innerWidth) : 320;
     const proportionalHeight = Math.floor(width / 6.4);
     return Math.min(75, Math.max(50, proportionalHeight));
   };
@@ -43,16 +47,25 @@ export function CoupangBanner({ format = 'mobile', id }: CoupangBannerProps) {
     const calculatedHeight = getCalculatedHeight();
     const isPcVertical = format === 'pc-vertical';
 
-    // 이미 해당 컨테이너에 스크립트가 로드되었는지 확인
-    if (containerRef.current.querySelector('script')) return;
+    // 해당 컨테이너의 중복 초기화 방지
+    if (containerRef.current.dataset.initialized === 'true') return;
 
     const script = document.createElement('script');
     script.src = "https://ads-partners.coupang.com/g.js";
     script.async = true;
 
     script.onload = () => {
+      // 컴포넌트가 언마운트되었는지 확인 (Ref가 여전히 존재하고 DOM에 붙어있는지)
+      if (!containerRef.current) return;
+
       if (window.PartnersCoupang) {
         try {
+          // 초기화 전에 컨테이너가 DOM에 존재하는지 최후 확인
+          if (!document.getElementById(bannerContainerId)) {
+            console.warn(`Coupang container ${bannerContainerId} not found in DOM yet.`);
+            return;
+          }
+
           new window.PartnersCoupang.G({
             "id": 954727,
             "template": "carousel",
@@ -60,8 +73,12 @@ export function CoupangBanner({ format = 'mobile', id }: CoupangBannerProps) {
             "width": isPcVertical ? '160' : '100%',
             "height": isPcVertical ? '600' : `${calculatedHeight}`,
             "tsource": "",
-            "container": bannerContainerId // 컨테이너 ID 명시적 전달 (지원되는 경우)
+            "container": bannerContainerId
           });
+          
+          if (containerRef.current) {
+            containerRef.current.dataset.initialized = 'true';
+          }
         } catch (e) {
           console.error("Coupang Banner Init Error:", e);
         }
@@ -73,6 +90,7 @@ export function CoupangBanner({ format = 'mobile', id }: CoupangBannerProps) {
     return () => {
       if (containerRef.current) {
         containerRef.current.innerHTML = '';
+        containerRef.current.dataset.initialized = 'false';
       }
     };
   }, [isDev, format, bannerContainerId]);

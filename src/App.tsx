@@ -62,6 +62,15 @@ function App() {
   // Scroll position preservation for search results
   const searchListScrollRef = useRef<number>(0);
 
+  // Responsive state
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Filter stores based on search query and category
   const filteredStores = useMemo(() => {
     let result = stores;
@@ -508,7 +517,7 @@ function App() {
               />
           </div>
 
-          {window.innerWidth < 768 && (
+          {isMobile && (
             <div className="md:hidden">
                   <MobileBottomSheet
                       isOpen={true}
@@ -585,7 +594,7 @@ function App() {
             </div>
           )}
 
-          {window.innerWidth >= 768 && (
+          {!isMobile && (
             <div className="hidden md:block">
                   <DesktopLeftPanel
                       isVisible={isPanelVisible}
