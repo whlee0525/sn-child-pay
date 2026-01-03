@@ -10,7 +10,7 @@ declare global {
         width: string;
         height: string;
         tsource: string;
-        container?: string;
+        container?: HTMLElement | string;
       }) => void;
     };
   }
@@ -21,7 +21,7 @@ interface CoupangBannerProps {
   id?: string;
 }
 
-// 스크립트 로딩 상태를 전역적으로 관리
+// 스크립트 로딩 상태를 전역적으로 관리 (싱글톤 패턴)
 let isScriptLoading = false;
 const scriptLoadListeners: (() => void)[] = [];
 
@@ -29,6 +29,7 @@ export function CoupangBanner({ format = 'mobile', id: propsId }: CoupangBannerP
   const containerRef = useRef<HTMLDivElement>(null);
   const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   
+  // 컨테이너 ID를 컴포넌트 생명주기 동안 안정적으로 유지 (DOM ID 확인용)
   const bannerContainerId = useMemo(() => {
     if (propsId) return propsId;
     return `coupang-banner-${format}-${Math.random().toString(36).substring(2, 9)}`;
@@ -45,20 +46,17 @@ export function CoupangBanner({ format = 'mobile', id: propsId }: CoupangBannerP
     if (isDev) return;
 
     const initializeAd = () => {
-      if (!containerRef.current || !window.PartnersCoupang) return;
+      // 컴포넌트가 언마운트되었거나 이미 초기화된 경우 방지
+      if (!containerRef.current) return;
       if (containerRef.current.dataset.initialized === 'true') return;
+      if (!window.PartnersCoupang) return;
 
       try {
-        // DOM에 컨테이너가 확실히 존재하는지 확인
-        if (!document.getElementById(bannerContainerId)) {
-          // 아직 DOM에 안 나타났다면 다음 프레임에 시도
-          requestAnimationFrame(initializeAd);
-          return;
-        }
-
         const calculatedHeight = getCalculatedHeight();
         const isPcVertical = format === 'pc-vertical';
 
+        // g.js 소스 분석 결과: container 옵션에 string을 주면 document.querySelector()를 사용함.
+        // ID를 줄 경우 '#'이 없으면 에러가 발생하므로, 가장 확실한 방법인 HTMLElement(Ref)를 직접 전달함.
         new window.PartnersCoupang.G({
           "id": 954727,
           "template": "carousel",
@@ -66,18 +64,21 @@ export function CoupangBanner({ format = 'mobile', id: propsId }: CoupangBannerP
           "width": isPcVertical ? '160' : '100%',
           "height": isPcVertical ? '600' : `${calculatedHeight}`,
           "tsource": "",
-          "container": bannerContainerId
+          "container": containerRef.current // HTMLElement를 직접 전달
         });
         
-        containerRef.current.dataset.initialized = 'true';
+        if (containerRef.current) {
+          containerRef.current.dataset.initialized = 'true';
+        }
       } catch (e) {
         console.error("Coupang Banner Init Error:", e);
       }
     };
 
-    // 스크립트 로드 정석 처리
+    // 스크립트 로드 및 초기화 실행
     if (window.PartnersCoupang) {
-      initializeAd();
+      // 이미 로드된 경우 즉시 실행. 단, DOM이 완전히 준비되도록 배정
+      setTimeout(initializeAd, 0);
     } else {
       if (!isScriptLoading) {
         isScriptLoading = true;

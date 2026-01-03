@@ -295,7 +295,7 @@ function App() {
                 onCreate={setMap}
                 onClick={() => {
                     // Minimize on mobile
-                    if (window.innerWidth < 768) {
+                    if (isMobile) {
                         setIsMinimized(true);
                     }
 
