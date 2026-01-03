@@ -21,11 +21,14 @@ interface CoupangBannerProps {
   id?: string;
 }
 
+// 스크립트 로딩 상태를 전역적으로 관리
+let isScriptLoading = false;
+const scriptLoadListeners: (() => void)[] = [];
+
 export function CoupangBanner({ format = 'mobile', id: propsId }: CoupangBannerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   
-  // 컨테이너 ID를 컴포넌트 생명주기 동안 안정적으로 유지
   const bannerContainerId = useMemo(() => {
     if (propsId) return propsId;
     return `coupang-banner-${format}-${Math.random().toString(36).substring(2, 9)}`;
@@ -33,8 +36,6 @@ export function CoupangBanner({ format = 'mobile', id: propsId }: CoupangBannerP
 
   const getCalculatedHeight = () => {
     if (format === 'pc-vertical') return 600;
-    
-    // 모바일에서는 화면 너비에 따라 비례 제어
     const width = typeof window !== 'undefined' ? (window.innerWidth > 480 ? 480 : window.innerWidth) : 320;
     const proportionalHeight = Math.floor(width / 6.4);
     return Math.min(75, Math.max(50, proportionalHeight));
@@ -42,50 +43,56 @@ export function CoupangBanner({ format = 'mobile', id: propsId }: CoupangBannerP
 
   useEffect(() => {
     if (isDev) return;
-    if (!containerRef.current) return;
 
-    const calculatedHeight = getCalculatedHeight();
-    const isPcVertical = format === 'pc-vertical';
+    const initializeAd = () => {
+      if (!containerRef.current || !window.PartnersCoupang) return;
+      if (containerRef.current.dataset.initialized === 'true') return;
 
-    // 해당 컨테이너의 중복 초기화 방지
-    if (containerRef.current.dataset.initialized === 'true') return;
-
-    const script = document.createElement('script');
-    script.src = "https://ads-partners.coupang.com/g.js";
-    script.async = true;
-
-    script.onload = () => {
-      // 컴포넌트가 언마운트되었는지 확인 (Ref가 여전히 존재하고 DOM에 붙어있는지)
-      if (!containerRef.current) return;
-
-      if (window.PartnersCoupang) {
-        try {
-          // 초기화 전에 컨테이너가 DOM에 존재하는지 최후 확인
-          if (!document.getElementById(bannerContainerId)) {
-            console.warn(`Coupang container ${bannerContainerId} not found in DOM yet.`);
-            return;
-          }
-
-          new window.PartnersCoupang.G({
-            "id": 954727,
-            "template": "carousel",
-            "trackingCode": "AF0762988",
-            "width": isPcVertical ? '160' : '100%',
-            "height": isPcVertical ? '600' : `${calculatedHeight}`,
-            "tsource": "",
-            "container": bannerContainerId
-          });
-          
-          if (containerRef.current) {
-            containerRef.current.dataset.initialized = 'true';
-          }
-        } catch (e) {
-          console.error("Coupang Banner Init Error:", e);
+      try {
+        // DOM에 컨테이너가 확실히 존재하는지 확인
+        if (!document.getElementById(bannerContainerId)) {
+          // 아직 DOM에 안 나타났다면 다음 프레임에 시도
+          requestAnimationFrame(initializeAd);
+          return;
         }
+
+        const calculatedHeight = getCalculatedHeight();
+        const isPcVertical = format === 'pc-vertical';
+
+        new window.PartnersCoupang.G({
+          "id": 954727,
+          "template": "carousel",
+          "trackingCode": "AF0762988",
+          "width": isPcVertical ? '160' : '100%',
+          "height": isPcVertical ? '600' : `${calculatedHeight}`,
+          "tsource": "",
+          "container": bannerContainerId
+        });
+        
+        containerRef.current.dataset.initialized = 'true';
+      } catch (e) {
+        console.error("Coupang Banner Init Error:", e);
       }
     };
 
-    containerRef.current.appendChild(script);
+    // 스크립트 로드 정석 처리
+    if (window.PartnersCoupang) {
+      initializeAd();
+    } else {
+      if (!isScriptLoading) {
+        isScriptLoading = true;
+        const script = document.createElement('script');
+        script.src = "https://ads-partners.coupang.com/g.js";
+        script.async = true;
+        script.onload = () => {
+          isScriptLoading = false;
+          scriptLoadListeners.forEach(cb => cb());
+          scriptLoadListeners.length = 0;
+        };
+        document.head.appendChild(script);
+      }
+      scriptLoadListeners.push(initializeAd);
+    }
 
     return () => {
       if (containerRef.current) {

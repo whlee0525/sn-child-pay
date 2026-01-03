@@ -64,9 +64,13 @@ function App() {
 
   // Responsive state
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isXl, setIsXl] = useState(window.innerWidth >= 1280);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsXl(window.innerWidth >= 1280);
+    };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -509,13 +513,15 @@ function App() {
             </button>
           )}
 
-          {/* PC Right Panel (160px -> 192px for padding) */}
-          <div className="hidden xl:flex absolute top-0 right-0 w-[192px] h-full z-50 bg-black/10 backdrop-blur-sm items-start justify-center pt-4">
-              <CoupangBanner 
-                  id="coupang-pc-right"
-                  format="pc-vertical" 
-              />
-          </div>
+          {/* PC Right Panel (Only render if NOT mobile AND >= 1280px) */}
+          {!isMobile && isXl && (
+            <div className="hidden xl:flex absolute top-0 right-0 w-[192px] h-full z-50 bg-black/10 backdrop-blur-sm items-start justify-center pt-4">
+                <CoupangBanner 
+                    id="coupang-pc-right"
+                    format="pc-vertical" 
+                />
+            </div>
+          )}
 
           {isMobile && (
             <div className="md:hidden">
