@@ -14,7 +14,7 @@ interface StoreData {
 
 import { useSupercluster } from './hooks/useSupercluster';
 import { MobileBottomSheet } from './components/MobileBottomSheet';
-import { AdBanner } from './components/AdBanner';
+import { CoupangBanner } from './components/CoupangBanner';
 import { DesktopLeftPanel } from './components/DesktopLeftPanel';
 import { StoreDetailView } from './components/StoreDetailView';
 import { StoreListView } from './components/StoreListView';
@@ -502,8 +502,7 @@ function App() {
 
           {/* PC Right Panel (160px -> 192px for padding) */}
           <div className="hidden xl:flex absolute top-0 right-0 w-[192px] h-full z-50 bg-black/10 backdrop-blur-sm items-start justify-center pt-4">
-              <AdBanner 
-                  unitId={import.meta.env.VITE_KAKAO_ADFIT_UNIT_ID_PC_RIGHT} 
+              <CoupangBanner 
                   format="pc-vertical" 
               />
           </div>
