@@ -1,5 +1,20 @@
 import { useEffect, useRef } from 'react';
 
+declare global {
+  interface Window {
+    PartnersCoupang: {
+      G: new (config: {
+        id: number;
+        template: string;
+        trackingCode: string;
+        width: string;
+        height: string;
+        tsource: string;
+      }) => void;
+    };
+  }
+}
+
 interface CoupangBannerProps {
   format?: 'mobile' | 'pc-vertical';
 }
@@ -9,14 +24,12 @@ export function CoupangBanner({ format = 'mobile' }: CoupangBannerProps) {
   const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
   // 가로 너비에 따른 비례 높이 계산 (기본 320:50 비율)
-  // 320:50 => 6.4:1
-  // 최대 높이는 75px로 제한
   const getCalculatedHeight = () => {
     if (format === 'pc-vertical') return 600;
     
-    const width = window.innerWidth > 480 ? 480 : window.innerWidth; // 너무 큰 화면 대비
+    const width = window.innerWidth > 480 ? 480 : window.innerWidth;
     const proportionalHeight = Math.floor(width / 6.4);
-    return Math.min(75, Math.max(50, proportionalHeight)); // 최소 50, 최대 75
+    return Math.min(75, Math.max(50, proportionalHeight));
   };
 
   useEffect(() => {
@@ -26,25 +39,26 @@ export function CoupangBanner({ format = 'mobile' }: CoupangBannerProps) {
     const calculatedHeight = getCalculatedHeight();
     const isPcVertical = format === 'pc-vertical';
 
-    // 실제 배포 환경에서만 스크립트 로드
+    // 1. 외부 스크립트 먼저 로드
     const script = document.createElement('script');
     script.src = "https://ads-partners.coupang.com/g.js";
     script.async = true;
 
-    const inlineScript = document.createElement('script');
-    inlineScript.innerHTML = `
-      new PartnersCoupang.G({
-        "id": 954727,
-        "template": "carousel",
-        "trackingCode": "AF0762988",
-        "width": "${isPcVertical ? '160' : '100%'}",
-        "height": "${isPcVertical ? '600' : calculatedHeight}",
-        "tsource": ""
-      });
-    `;
+    // 2. 스크립트 로드 완료 시점에 초기화 수행
+    script.onload = () => {
+      if (window.PartnersCoupang) {
+        new window.PartnersCoupang.G({
+          "id": 954727,
+          "template": "carousel",
+          "trackingCode": "AF0762988",
+          "width": isPcVertical ? '160' : '100%',
+          "height": isPcVertical ? '600' : `${calculatedHeight}`,
+          "tsource": ""
+        });
+      }
+    };
 
     containerRef.current.appendChild(script);
-    containerRef.current.appendChild(inlineScript);
 
     return () => {
       if (containerRef.current) {
@@ -56,13 +70,11 @@ export function CoupangBanner({ format = 'mobile' }: CoupangBannerProps) {
   const calculatedHeight = getCalculatedHeight();
   const isPcVertical = format === 'pc-vertical';
 
-  // 개발 환경용 더미 UI
+  // 개발 환경용 더미 UI (동일하게 유지)
   if (isDev) {
     if (isPcVertical) {
       return (
-        <div 
-          className="flex flex-col items-center justify-between py-10 px-2 w-[160px] h-[600px] bg-gray-50 border border-dashed border-gray-300 rounded-lg overflow-hidden"
-        >
+        <div className="flex flex-col items-center justify-between py-10 px-2 w-[160px] h-[600px] bg-gray-50 border border-dashed border-gray-300 rounded-lg overflow-hidden">
           <div className="flex flex-col items-center gap-4 text-center">
             <span className="bg-gray-200 text-[10px] text-gray-400 px-1 rounded font-sans">쿠팡 AD</span>
             <div>
@@ -70,9 +82,7 @@ export function CoupangBanner({ format = 'mobile' }: CoupangBannerProps) {
               <p className="text-xs text-gray-400 mt-2">160 x 600</p>
             </div>
           </div>
-          <div className="text-[10px] text-gray-400 text-center leading-tight">
-            개발 환경에서는<br/>광고가 노출되지 않습니다
-          </div>
+          <div className="text-[10px] text-gray-400 text-center leading-tight">개발 환경에서는<br/>광고가 노출되지 않습니다</div>
         </div>
       );
     }
