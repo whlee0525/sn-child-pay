@@ -503,157 +503,160 @@ function App() {
           {/* PC Right Panel (160px -> 192px for padding) */}
           <div className="hidden xl:flex absolute top-0 right-0 w-[192px] h-full z-50 bg-black/10 backdrop-blur-sm items-start justify-center pt-4">
               <CoupangBanner 
+                  id="coupang-pc-right"
                   format="pc-vertical" 
               />
           </div>
 
-          {/* Mobile Bottom Sheet */}
-          <div className="md:hidden">
-                <MobileBottomSheet
-                    isOpen={true}
-                    minimized={isMinimized}
-                    dataLoading={dataLoading}
-                    expandedHeight="65%"
-                    onMinimize={() => setIsMinimized(!isMinimized)}
-                    onBack={
-                      selectedStore ? () => {
-                        setSelectedStore(null);
-                        setHighlightedStoreId(null);
-                        if (searchQuery.trim()) {
-                            // Restore search results if query exists
-                            setClusterStores(filteredStores.slice(0, 100));
-                            setIsFromSearch(true);
-                        } else {
-                            // No search query, clear list (will be auto-filled by visible stores effect)
-                            setClusterStores(null);
-                        }
-                        setIsMinimized(false);
-                      } : undefined
-                    }
-                    searchBar={!selectedStore ? (
-                      <SearchBar
-                        value={searchQuery}
-                        onChange={setSearchQuery}
-                        onSubmit={fitBoundsToResults}
-                        placeholder="가게 이름이나 주소 검색..."
-                        resultCount={searchQuery ? filteredStores.length : undefined}
-                        totalCount={!searchQuery ? filteredStores.length : undefined}
-                        selectedCategory={selectedCategory}
-                      />
-                    ) : undefined}
-                >
-                    {/* Content based on state */}
-                    <div className="transition-all duration-300 ease-in-out h-full" key={selectedStore ? 'detail' : clusterStores ? 'list' : 'empty'}>
-                      {selectedStore ? (
-                          <div className="animate-slideInRight pt-4">
-                            <StoreDetailView
-                                name={selectedStore.n}
-                                category={selectedStore.c}
-                                address={selectedStore.a}
-                            />
-                          </div>
-                      ) : clusterStores ? (
-                          <div className="animate-fadeIn">
-                            <StoreListView
-                                stores={clusterStores}
-                                scrollPositionRef={isFromSearch ? searchListScrollRef : undefined}
-                                onSelectStore={(store) => {
-                                    const fullStore = stores.find(s => s.id === store.id);
-                                    if (fullStore) {
-                                        if (map) {
-                                            map.panTo(new kakao.maps.LatLng(fullStore.l[0], fullStore.l[1]));
-                                        }
-                                        setHighlightedStoreId(fullStore.id);
-                                        setSelectedStore(fullStore);
-                                        setIsMinimized(false);
-                                    }
-                                }}
-                            />
-                          </div>
-                      ) : (
-                          <div className="text-center text-gray-400 text-sm animate-fadeIn h-full flex items-center justify-center">
-                            {searchQuery ? (
-                              <p>검색 결과가 없습니다</p>
-                            ) : (
-                              <p>🔍 가게를 검색하거나<br/>지도에서 마커를 클릭해보세요</p>
-                            )}
-                          </div>
-                      )}
-                    </div>
-                </MobileBottomSheet>
-          </div>
+          {window.innerWidth < 768 && (
+            <div className="md:hidden">
+                  <MobileBottomSheet
+                      isOpen={true}
+                      minimized={isMinimized}
+                      dataLoading={dataLoading}
+                      expandedHeight="65%"
+                      onMinimize={() => setIsMinimized(!isMinimized)}
+                      onBack={
+                        selectedStore ? () => {
+                          setSelectedStore(null);
+                          setHighlightedStoreId(null);
+                          if (searchQuery.trim()) {
+                              // Restore search results if query exists
+                              setClusterStores(filteredStores.slice(0, 100));
+                              setIsFromSearch(true);
+                          } else {
+                              // No search query, clear list (will be auto-filled by visible stores effect)
+                              setClusterStores(null);
+                          }
+                          setIsMinimized(false);
+                        } : undefined
+                      }
+                      searchBar={!selectedStore ? (
+                        <SearchBar
+                          value={searchQuery}
+                          onChange={setSearchQuery}
+                          onSubmit={fitBoundsToResults}
+                          placeholder="가게 이름이나 주소 검색..."
+                          resultCount={searchQuery ? filteredStores.length : undefined}
+                          totalCount={!searchQuery ? filteredStores.length : undefined}
+                          selectedCategory={selectedCategory}
+                        />
+                      ) : undefined}
+                  >
+                      {/* Content based on state */}
+                      <div className="transition-all duration-300 ease-in-out h-full" key={selectedStore ? 'detail' : clusterStores ? 'list' : 'empty'}>
+                        {selectedStore ? (
+                            <div className="animate-slideInRight pt-4">
+                              <StoreDetailView
+                                  name={selectedStore.n}
+                                  category={selectedStore.c}
+                                  address={selectedStore.a}
+                              />
+                            </div>
+                        ) : clusterStores ? (
+                            <div className="animate-fadeIn">
+                              <StoreListView
+                                  stores={clusterStores}
+                                  scrollPositionRef={isFromSearch ? searchListScrollRef : undefined}
+                                  onSelectStore={(store) => {
+                                      const fullStore = stores.find(s => s.id === store.id);
+                                      if (fullStore) {
+                                          if (map) {
+                                              map.panTo(new kakao.maps.LatLng(fullStore.l[0], fullStore.l[1]));
+                                          }
+                                          setHighlightedStoreId(fullStore.id);
+                                          setSelectedStore(fullStore);
+                                          setIsMinimized(false);
+                                      }
+                                  }}
+                              />
+                            </div>
+                        ) : (
+                            <div className="text-center text-gray-400 text-sm animate-fadeIn h-full flex items-center justify-center">
+                              {searchQuery ? (
+                                <p>검색 결과가 없습니다</p>
+                              ) : (
+                                <p>🔍 가게를 검색하거나<br/>지도에서 마커를 클릭해보세요</p>
+                              )}
+                            </div>
+                        )}
+                      </div>
+                  </MobileBottomSheet>
+            </div>
+          )}
 
-          {/* Desktop Left Panel */}
-          <div className="hidden md:block">
-                <DesktopLeftPanel
-                    isVisible={isPanelVisible}
-                    dataLoading={dataLoading}
-                    onClose={() => setIsPanelVisible(false)}
-                    onBack={
-                      selectedStore ? () => {
-                        setSelectedStore(null);
-                        setHighlightedStoreId(null);
-                        if (searchQuery.trim()) {
-                            // Restore search results if query exists
-                            setClusterStores(filteredStores.slice(0, 100));
-                            setIsFromSearch(true);
-                        } else {
-                            // No search query, clear list (will be auto-filled by visible stores effect)
-                            setClusterStores(null);
-                        }
-                      } : undefined
-                    }
-                    searchBar={!selectedStore ? (
-                      <SearchBar
-                        value={searchQuery}
-                        onChange={setSearchQuery}
-                        onSubmit={fitBoundsToResults}
-                        placeholder="가게 이름이나 주소 검색..."
-                        resultCount={searchQuery ? filteredStores.length : undefined}
-                        totalCount={!searchQuery ? filteredStores.length : undefined}
-                        selectedCategory={selectedCategory}
-                      />
-                    ) : undefined}
-                >
-                    {/* Content based on state */}
-                    <div className="transition-all duration-300 ease-in-out h-full" key={selectedStore ? 'detail' : clusterStores ? 'list' : 'empty'}>
-                      {selectedStore ? (
-                          <div className="animate-slideInRight pt-4">
-                            <StoreDetailView
-                                name={selectedStore.n}
-                                category={selectedStore.c}
-                                address={selectedStore.a}
-                            />
-                          </div>
-                      ) : clusterStores ? (
-                          <div className="animate-fadeIn">
-                            <StoreListView
-                                stores={clusterStores}
-                                scrollPositionRef={isFromSearch ? searchListScrollRef : undefined}
-                                onSelectStore={(store) => {
-                                    const fullStore = stores.find(s => s.id === store.id);
-                                    if (fullStore) {
-                                        if (map) {
-                                            map.panTo(new kakao.maps.LatLng(fullStore.l[0], fullStore.l[1]));
-                                        }
-                                        setHighlightedStoreId(fullStore.id);
-                                        setSelectedStore(fullStore);
-                                    }
-                                }}
-                            />
-                          </div>
-                      ) : (
-                          <div className="text-center text-gray-400 text-sm animate-fadeIn h-full flex items-center justify-center">
-                            {searchQuery ? (
-                              <p>검색 결과가 없습니다</p>
-                            ) : (
-                              <p>🔍 가게를 검색하거나<br/>지도에서 마커를 클릭해보세요</p>
-                            )}
-                          </div>
-                      )}
-                    </div>
-                </DesktopLeftPanel>
-          </div>
+          {window.innerWidth >= 768 && (
+            <div className="hidden md:block">
+                  <DesktopLeftPanel
+                      isVisible={isPanelVisible}
+                      dataLoading={dataLoading}
+                      onClose={() => setIsPanelVisible(false)}
+                      onBack={
+                        selectedStore ? () => {
+                          setSelectedStore(null);
+                          setHighlightedStoreId(null);
+                          if (searchQuery.trim()) {
+                              // Restore search results if query exists
+                              setClusterStores(filteredStores.slice(0, 100));
+                              setIsFromSearch(true);
+                          } else {
+                              // No search query, clear list (will be auto-filled by visible stores effect)
+                              setClusterStores(null);
+                          }
+                        } : undefined
+                      }
+                      searchBar={!selectedStore ? (
+                        <SearchBar
+                          value={searchQuery}
+                          onChange={setSearchQuery}
+                          onSubmit={fitBoundsToResults}
+                          placeholder="가게 이름이나 주소 검색..."
+                          resultCount={searchQuery ? filteredStores.length : undefined}
+                          totalCount={!searchQuery ? filteredStores.length : undefined}
+                          selectedCategory={selectedCategory}
+                        />
+                      ) : undefined}
+                  >
+                      {/* Content based on state */}
+                      <div className="transition-all duration-300 ease-in-out h-full" key={selectedStore ? 'detail' : clusterStores ? 'list' : 'empty'}>
+                        {selectedStore ? (
+                            <div className="animate-slideInRight pt-4">
+                              <StoreDetailView
+                                  name={selectedStore.n}
+                                  category={selectedStore.c}
+                                  address={selectedStore.a}
+                              />
+                            </div>
+                        ) : clusterStores ? (
+                            <div className="animate-fadeIn">
+                              <StoreListView
+                                  stores={clusterStores}
+                                  scrollPositionRef={isFromSearch ? searchListScrollRef : undefined}
+                                  onSelectStore={(store) => {
+                                      const fullStore = stores.find(s => s.id === store.id);
+                                      if (fullStore) {
+                                          if (map) {
+                                              map.panTo(new kakao.maps.LatLng(fullStore.l[0], fullStore.l[1]));
+                                          }
+                                          setHighlightedStoreId(fullStore.id);
+                                          setSelectedStore(fullStore);
+                                      }
+                                  }}
+                              />
+                            </div>
+                        ) : (
+                            <div className="text-center text-gray-400 text-sm animate-fadeIn h-full flex items-center justify-center">
+                              {searchQuery ? (
+                                <p>검색 결과가 없습니다</p>
+                              ) : (
+                                <p>🔍 가게를 검색하거나<br/>지도에서 마커를 클릭해보세요</p>
+                              )}
+                            </div>
+                        )}
+                      </div>
+                  </DesktopLeftPanel>
+            </div>
+          )}
     </div>
     <Analytics />
     <SpeedInsights />

@@ -105,7 +105,7 @@ export function MobileBottomSheet({
             {/* Footer */}
             <div className="px-4 pt-[10px] pb-2 border-t border-gray-100 shrink-0 space-y-2 bg-white">
               <FooterInfo />
-              <CoupangBanner />
+              <CoupangBanner id="coupang-mobile-bottom" />
             </div>
           </>
         )}

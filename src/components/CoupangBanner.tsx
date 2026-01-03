@@ -10,6 +10,7 @@ declare global {
         width: string;
         height: string;
         tsource: string;
+        container?: string;
       }) => void;
     };
   }
@@ -17,13 +18,16 @@ declare global {
 
 interface CoupangBannerProps {
   format?: 'mobile' | 'pc-vertical';
+  id?: string; // 고유 ID 추가
 }
 
-export function CoupangBanner({ format = 'mobile' }: CoupangBannerProps) {
+export function CoupangBanner({ format = 'mobile', id }: CoupangBannerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  
+  // 컨테이너 ID 생성 (Props가 없으면 기본값 사용)
+  const bannerContainerId = id || `coupang-banner-${format}-${Math.random().toString(36).substr(2, 9)}`;
 
-  // 가로 너비에 따른 비례 높이 계산 (기본 320:50 비율)
   const getCalculatedHeight = () => {
     if (format === 'pc-vertical') return 600;
     
@@ -39,22 +43,28 @@ export function CoupangBanner({ format = 'mobile' }: CoupangBannerProps) {
     const calculatedHeight = getCalculatedHeight();
     const isPcVertical = format === 'pc-vertical';
 
-    // 1. 외부 스크립트 먼저 로드
+    // 이미 해당 컨테이너에 스크립트가 로드되었는지 확인
+    if (containerRef.current.querySelector('script')) return;
+
     const script = document.createElement('script');
     script.src = "https://ads-partners.coupang.com/g.js";
     script.async = true;
 
-    // 2. 스크립트 로드 완료 시점에 초기화 수행
     script.onload = () => {
       if (window.PartnersCoupang) {
-        new window.PartnersCoupang.G({
-          "id": 954727,
-          "template": "carousel",
-          "trackingCode": "AF0762988",
-          "width": isPcVertical ? '160' : '100%',
-          "height": isPcVertical ? '600' : `${calculatedHeight}`,
-          "tsource": ""
-        });
+        try {
+          new window.PartnersCoupang.G({
+            "id": 954727,
+            "template": "carousel",
+            "trackingCode": "AF0762988",
+            "width": isPcVertical ? '160' : '100%',
+            "height": isPcVertical ? '600' : `${calculatedHeight}`,
+            "tsource": "",
+            "container": bannerContainerId // 컨테이너 ID 명시적 전달 (지원되는 경우)
+          });
+        } catch (e) {
+          console.error("Coupang Banner Init Error:", e);
+        }
       }
     };
 
@@ -65,12 +75,11 @@ export function CoupangBanner({ format = 'mobile' }: CoupangBannerProps) {
         containerRef.current.innerHTML = '';
       }
     };
-  }, [isDev, format]);
+  }, [isDev, format, bannerContainerId]);
 
   const calculatedHeight = getCalculatedHeight();
   const isPcVertical = format === 'pc-vertical';
 
-  // 개발 환경용 더미 UI (동일하게 유지)
   if (isDev) {
     if (isPcVertical) {
       return (
@@ -105,7 +114,11 @@ export function CoupangBanner({ format = 'mobile' }: CoupangBannerProps) {
       className={`flex justify-center overflow-hidden rounded-lg transition-all duration-300 ${isPcVertical ? 'w-[160px] h-[600px]' : 'w-full'}`}
       style={!isPcVertical ? { minHeight: `${calculatedHeight}px` } : {}}
     >
-      <div ref={containerRef} className={isPcVertical ? 'w-[160px]' : 'w-full'}></div>
+      <div 
+        id={bannerContainerId}
+        ref={containerRef} 
+        className={isPcVertical ? 'w-[160px]' : 'w-full'}
+      ></div>
     </div>
   );
 }
