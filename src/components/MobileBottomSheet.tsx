@@ -110,7 +110,7 @@ export function MobileBottomSheet({
             )}
 
             {/* Scrollable Body */}
-            <div className="px-4 pb-4 flex-1 overflow-y-auto">
+            <div className="px-4 pb-[10px] flex-1 overflow-y-auto">
               {children}
             </div>
 

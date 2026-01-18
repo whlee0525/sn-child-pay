@@ -41,13 +41,6 @@ export function AdBanner({ unitId, format = 'mobile' }: AdBannerProps) {
       } else {
          ins.setAttribute('data-ad-width', 'responsive');
          ins.setAttribute('data-ad-height', '50'); // Mobile standard height
-         // responsive일 경우 height auto가 일반적이나, 
-         // Kakao AdFit 가이드에 따라 width=responsive시 height는 보통 auto/50/100 등 설정
-         // 여기서는 width만 responsive로 하고, CSS로 잡히는지 확인 필요하지만
-         // 보통 data-ad-width="responsive" 쓰면 data-ad-height는 무시되거나 auto여야 함.
-         // 하지만 기존 코드 data-ad-height="auto" 였음.
-         // 명시적으로 반응형 width일때 height 설정.
-         ins.setAttribute('data-ad-height', 'auto');
       }
 
       adContainerRef.current.appendChild(ins);
@@ -117,7 +110,7 @@ export function AdBanner({ unitId, format = 'mobile' }: AdBannerProps) {
         className={
             isPc ? 'w-[300px] h-[250px]' : 
             isPcVertical ? 'w-[160px] h-[600px]' : 
-            'w-full'
+            'w-full min-h-[50px]'
         } 
       />
     </div>
