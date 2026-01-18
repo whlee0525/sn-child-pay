@@ -1,4 +1,4 @@
-import { CoupangBanner } from './CoupangBanner';
+// import { CoupangBanner } from './CoupangBanner';
 
 interface StoreDetailProps {
   name: string;
@@ -33,11 +33,13 @@ export function StoreDetailView({ name, category, address }: StoreDetailProps) {
       </div>
 
       {/* Coupang Ad for detail view - Placed at the very bottom using mt-auto */}
+      {/* 
       <div className="mt-auto pt-6">
         <div className="flex justify-center">
           <CoupangBanner id="coupang-detail-view" format="mobile" />
         </div>
-      </div>
+      </div> 
+      */}
     </div>
   );
 }
