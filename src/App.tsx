@@ -22,6 +22,7 @@ import { SearchBar } from './components/SearchBar';
 import { CategoryFilter } from './components/CategoryFilter';
 import { Category } from './data/categories';
 import { getCategoryGroup } from './data/categoryMapping';
+import { ChildPayGuideModal } from './components/ChildPayGuideModal';
 
 function App() {
   const [, error] = useKakaoLoader({
@@ -61,6 +62,9 @@ function App() {
 
   // Scroll position preservation for search results
   const searchListScrollRef = useRef<number>(0);
+
+  // Guide Modal State
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
 
   // Responsive state
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -531,6 +535,7 @@ function App() {
                       dataLoading={dataLoading}
                       expandedHeight="65%"
                       onMinimize={() => setIsMinimized(!isMinimized)}
+                      onShowGuide={() => setIsGuideOpen(true)}
                       onBack={
                         selectedStore ? () => {
                           setSelectedStore(null);
@@ -606,6 +611,7 @@ function App() {
                       isVisible={isPanelVisible}
                       dataLoading={dataLoading}
                       onClose={() => setIsPanelVisible(false)}
+                      onShowGuide={() => setIsGuideOpen(true)}
                       onBack={
                         selectedStore ? () => {
                           setSelectedStore(null);
@@ -675,6 +681,10 @@ function App() {
     </div>
     <Analytics />
     <SpeedInsights />
+    <ChildPayGuideModal 
+      isOpen={isGuideOpen} 
+      onClose={() => setIsGuideOpen(false)} 
+    />
     </>
   );
 }

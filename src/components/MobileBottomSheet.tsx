@@ -11,10 +11,11 @@ interface MobileBottomSheetProps {
   searchBar?: React.ReactNode;
   children: React.ReactNode;
   expandedHeight?: string;
+  onShowGuide?: () => void;
 }
 
 export function MobileBottomSheet({
-  isOpen, onMinimize, onBack, minimized, dataLoading, searchBar, children, expandedHeight = '70%'
+  isOpen, onMinimize, onBack, minimized, dataLoading, searchBar, children, expandedHeight = '70%', onShowGuide
 }: MobileBottomSheetProps) {
   return (
     <>
@@ -34,10 +35,21 @@ export function MobileBottomSheet({
       >
         {/* Header */}
         <div className="shrink-0 flex items-center justify-between px-4 py-2">
-          <div className="flex-1 mr-2 flex items-center gap-2">
+          <div className="flex-1 mr-2 flex items-center gap-0.5">
             <h2 className={`truncate ${minimized ? 'text-sm font-medium text-[#004098]' : 'text-base font-bold text-[#004098]'}`}>
-              성남시 아동수당 사용처
+              성남시 아동수당
             </h2>
+            {!minimized && (
+              <button 
+                onClick={onShowGuide}
+                className="p-1 hover:bg-blue-50 rounded-full transition-colors group"
+                title="상세 안내 보기"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#004098]/60 group-hover:text-[#004098]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+            )}
             {dataLoading && !minimized && (
               <span className="text-xs text-gray-400 whitespace-nowrap">데이터 로딩중</span>
             )}
