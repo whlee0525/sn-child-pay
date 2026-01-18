@@ -566,7 +566,7 @@ function App() {
                       {/* Content based on state */}
                       <div className="transition-all duration-300 ease-in-out h-full" key={selectedStore ? 'detail' : clusterStores ? 'list' : 'empty'}>
                         {selectedStore ? (
-                            <div className="animate-slideInRight pt-4">
+                            <div className="animate-slideInRight pt-4 h-full">
                               <StoreDetailView
                                   name={selectedStore.n}
                                   category={selectedStore.c}
@@ -641,7 +641,7 @@ function App() {
                       {/* Content based on state */}
                       <div className="transition-all duration-300 ease-in-out h-full" key={selectedStore ? 'detail' : clusterStores ? 'list' : 'empty'}>
                         {selectedStore ? (
-                            <div className="animate-slideInRight pt-4">
+                            <div className="animate-slideInRight pt-4 h-full">
                               <StoreDetailView
                                   name={selectedStore.n}
                                   category={selectedStore.c}

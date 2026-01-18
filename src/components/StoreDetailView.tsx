@@ -1,3 +1,5 @@
+import { CoupangBanner } from './CoupangBanner';
+
 interface StoreDetailProps {
   name: string;
   category: string;
@@ -16,17 +18,26 @@ const getCategoryColor = (category: string): string => {
 
 export function StoreDetailView({ name, category, address }: StoreDetailProps) {
   return (
-    <div>
-      {/* Store Name */}
-      <h3 className="text-xl font-bold text-gray-900 mb-3">{name}</h3>
+    <div className="flex flex-col h-full">
+      <div className="flex-1">
+        {/* Store Name */}
+        <h3 className="text-xl font-bold text-gray-900 mb-3">{name}</h3>
 
-      {/* Store Info */}
-      <div className="flex items-center gap-2 mb-3">
-        <span className={`px-2 py-0.5 rounded text-xs font-bold ${getCategoryColor(category)}`}>
-          {category}
-        </span>
+        {/* Store Info */}
+        <div className="flex items-center gap-2 mb-3">
+          <span className={`px-2 py-0.5 rounded text-xs font-bold ${getCategoryColor(category)}`}>
+            {category}
+          </span>
+        </div>
+        <p className="text-sm text-gray-600 leading-relaxed">{address}</p>
       </div>
-      <p className="text-sm text-gray-600 leading-relaxed">{address}</p>
+
+      {/* Coupang Ad for detail view - Placed at the very bottom using mt-auto */}
+      <div className="mt-auto pt-8">
+        <div className="border-t border-gray-50 pt-4 flex justify-center">
+          <CoupangBanner id="coupang-detail-view" format="mobile" />
+        </div>
+      </div>
     </div>
   );
 }

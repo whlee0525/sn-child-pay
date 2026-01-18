@@ -7,6 +7,7 @@ declare global {
         id: number;
         template: string;
         trackingCode: string;
+        subId?: string;
         width: string;
         height: string;
         tsource: string;
@@ -61,6 +62,7 @@ export function CoupangBanner({ format = 'mobile', id: propsId }: CoupangBannerP
           "id": 954727,
           "template": "carousel",
           "trackingCode": "AF0762988",
+          "subId": "SnChildPay",
           "width": isPcVertical ? '160' : '100%',
           "height": isPcVertical ? '600' : `${calculatedHeight}`,
           "tsource": "",
