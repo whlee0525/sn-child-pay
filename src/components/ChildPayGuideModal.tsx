@@ -81,7 +81,7 @@ export function ChildPayGuideModal({ isOpen, onClose }: ChildPayGuideModalProps)
           <div className="pt-6 mt-6 border-t border-gray-100 space-y-2 text-[11px] text-gray-400">
             <p className="flex items-center gap-1.5">
               <span>📊</span> 
-              <span><strong>데이터 출처:</strong> 신한카드 2025년 6월 자료 (매년 업데이트 예정)</span>
+              <span><strong>데이터 출처:</strong> 신한카드 2025년 11월 자료 (다음 업데이트 예정: 2026년 7월 ~ 11월)</span>
             </p>
             <p className="flex items-center gap-1.5">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-amber-400">
