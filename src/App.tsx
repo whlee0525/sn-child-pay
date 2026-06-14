@@ -103,11 +103,12 @@ function App() {
   // Progressive Data Loading: 중원구 -> 수정구+분당구
   useEffect(() => {
     let cancelled = false;
+    const DATA_VERSION = '202511';
 
     async function loadData() {
       try {
         // 1단계: 중원구 먼저 로드 (초기 화면)
-        const jungwonResponse = await fetch('/data/jungwon.json');
+        const jungwonResponse = await fetch(`/data/jungwon.json?v=${DATA_VERSION}`);
         const jungwonData: StoreData[] = await jungwonResponse.json();
 
         if (!cancelled) {
@@ -116,8 +117,8 @@ function App() {
 
         // 2단계: 수정구 + 분당구 병렬 로드
         const [sujeongResponse, bundangResponse] = await Promise.all([
-          fetch('/data/sujeong.json'),
-          fetch('/data/bundang.json')
+          fetch(`/data/sujeong.json?v=${DATA_VERSION}`),
+          fetch(`/data/bundang.json?v=${DATA_VERSION}`)
         ]);
 
         const [sujeongData, bundangData]: [StoreData[], StoreData[]] = await Promise.all([
