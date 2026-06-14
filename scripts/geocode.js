@@ -21,14 +21,43 @@ if (!fs.existsSync(INPUT_DIR)) {
     process.exit(1);
 }
 const files = fs.readdirSync(INPUT_DIR);
-const csvFile = files.find(file => file.startsWith('data') && file.endsWith('.csv'));
+const csvFiles = files.filter(file => file.startsWith('data') && file.endsWith('.csv'));
 
-if (!csvFile) {
+if (csvFiles.length === 0) {
   console.error('❌ Error: No CSV file found starting with "data" (e.g., data2025.csv)');
   process.exit(1);
 }
 
+// Sort files descending by numerical value in the filename to get the latest
+csvFiles.sort((a, b) => {
+  const numA = parseInt(a.replace(/\D/g, '')) || 0;
+  const numB = parseInt(b.replace(/\D/g, '')) || 0;
+  return numB - numA;
+});
+
+const csvFile = csvFiles[0];
+
 console.log(`📂 Found data file: ${csvFile}`);
+
+// Load existing coordinates cache if seeds.json exists
+const addressCache = new Map();
+if (fs.existsSync(OUTPUT_FILE)) {
+  try {
+    const rawExisting = fs.readFileSync(OUTPUT_FILE, 'utf-8');
+    const existingData = JSON.parse(rawExisting);
+    if (Array.isArray(existingData)) {
+      existingData.forEach(item => {
+        if (item.address && item.lat && item.lng && (item.status === 'normal' || item.status === 'rescued_by_name')) {
+          const key = item.address.replace(/\(.*?\)/g, '').replace(/,.*$/, '').replace(/[^가-힣0-9a-zA-Z]/g, '');
+          addressCache.set(key, { lat: item.lat, lng: item.lng });
+        }
+      });
+      console.log(`📂 Loaded ${addressCache.size} address coordinates from cache.`);
+    }
+  } catch (error) {
+    console.warn('⚠️ Warning: Failed to load coordinates cache, proceeding without cache.', error.message);
+  }
+}
 
 const results = [];
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -59,14 +88,45 @@ async function geocodeAddress(address) {
   }
 }
 
+function splitCsvLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
 async function processCsv() {
-  // Read file with EUC-KR decoding
+  // Read file and auto-detect encoding (UTF-8 or EUC-KR)
   const buffer = fs.readFileSync(path.join(INPUT_DIR, csvFile));
-  const content = iconv.decode(buffer, 'euc-kr');
+  
+  let content;
+  if (buffer[0] === 0xEF && buffer[1] === 0xBB && buffer[2] === 0xBF) {
+    content = buffer.toString('utf8');
+  } else {
+    const utf8Str = buffer.toString('utf8');
+    if (!utf8Str.includes('\ufffd')) {
+      content = utf8Str;
+    } else {
+      content = iconv.decode(buffer, 'euc-kr');
+    }
+  }
   
   // Split by line and handle basic CSV parsing manually
   const rows = content.split('\n').map(line => line.trim()).filter(line => line);
-  const headers = rows[0].split(',').map(h => h.trim());
+  const headers = splitCsvLine(rows[0]);
   
   console.log('📊 Detected headers:', headers);
   
@@ -93,7 +153,7 @@ async function processCsv() {
   const dataRows = rows.slice(1); 
   
   for (let i = 0; i < dataRows.length; i++) {
-    const cols = dataRows[i].split(','); 
+    const cols = splitCsvLine(dataRows[i]); 
     
     // Simple bounds check
     if (cols.length < addrIdx) continue;
@@ -101,14 +161,6 @@ async function processCsv() {
     const name = cols[nameIdx];
     const category = cols[catIdx];
     let address = cols[addrIdx];
-
-    // Handle quoted address
-    if (dataRows[i].includes('"')) {
-        const match = dataRows[i].match(/"([^"]+)"/); 
-        if (match && (match[1].includes('성남') || match[1].includes('경기'))) {
-            address = match[1];
-        }
-    }
     
     if (!address) continue;
 
@@ -120,19 +172,34 @@ async function processCsv() {
         .trim();
 
     let coords = null;
+    let isCached = false;
+    const cacheKey = cleanAddr.replace(/[^가-힣0-9a-zA-Z]/g, '');
 
-    try {
-        coords = await geocodeAddress(cleanAddr);
-        
-        // Retry with simpler address if failed
-        if (!coords) {
-             const simplerAddr = cleanAddr.replace(/\s\d+.*$/, ''); 
-             if (simplerAddr !== cleanAddr) coords = await geocodeAddress(simplerAddr);
-        }
-    } catch (error) {
-        if (error.message.includes('401') || error.message.includes('403') || error.message.includes('429')) {
-             console.error(`\n\n🛑 CRITICAL ERROR: ${error.message} - Stopping script to protect quota/key.`);
-             break;
+    if (addressCache.has(cacheKey)) {
+        coords = addressCache.get(cacheKey);
+        isCached = true;
+    } else {
+        try {
+            coords = await geocodeAddress(cleanAddr);
+            
+            // Retry with simpler address if failed
+            if (!coords) {
+                 const simplerAddr = cleanAddr.replace(/\s\d+.*$/, ''); 
+                 if (simplerAddr !== cleanAddr) {
+                     const simplerCacheKey = simplerAddr.replace(/[^가-힣0-9a-zA-Z]/g, '');
+                     if (addressCache.has(simplerCacheKey)) {
+                         coords = addressCache.get(simplerCacheKey);
+                         isCached = true;
+                     } else {
+                         coords = await geocodeAddress(simplerAddr);
+                     }
+                 }
+            }
+        } catch (error) {
+            if (error.message.includes('401') || error.message.includes('403') || error.message.includes('429')) {
+                 console.error(`\n\n🛑 CRITICAL ERROR: ${error.message} - Stopping script to protect quota/key.`);
+                 break;
+            }
         }
     }
 
@@ -173,7 +240,9 @@ async function processCsv() {
       }
     }
     
-    await delay(20); 
+    if (!isCached) {
+        await delay(20); 
+    }
   }
 
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(results, null, 2));
